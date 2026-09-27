@@ -1,9 +1,54 @@
 let pool = [], playerTiles = [], botTiles = [], board = [];
 let gameOver = false;
+let playerTurn = true; // Теперь этот параметр меняется динамически
 
 const dotsTemplate = Array(9).fill('<div class="dot"></div>').join('');
 
-function initGame() {
+// Запуск игры через монетку
+function startWithCoinFlip() {
+    document.getElementById('coinModal').style.display = 'flex';
+    document.getElementById('coinVisual').textContent = '🪙';
+    document.getElementById('coinVisual').style.transform = 'none';
+    // Блокируем кнопки в процессе жребия
+    const btns = document.querySelectorAll('.modal-buttons button');
+    btns.forEach(b => b.disabled = false);
+}
+
+function chooseCoin(playerChoice) {
+    const btns = document.querySelectorAll('.modal-buttons button');
+    btns.forEach(b => b.disabled = true); // Отключаем повторные клики
+
+    const coinVisual = document.getElementById('coinVisual');
+    coinVisual.style.transform = 'rotateY(1080deg)'; // Анимация кручения
+    
+    setTimeout(() => {
+        const sides = ['Heads', 'Tails'];
+        const flipResult = sides[Math.floor(Math.random() * 2)];
+        
+        coinVisual.textContent = flipResult === 'Heads' ? '🟡 (Heads)' : '⚪ (Tails)';
+        coinVisual.style.transform = 'none';
+
+        setTimeout(() => {
+            // Скрываем модальное окно
+            document.getElementById('coinModal').style.display = 'none';
+            
+            // Накатываем стандартную инициализацию костяшек
+            buildDeck();
+
+            if (playerChoice === flipResult) {
+                playerTurn = true;
+                logStatus("🎉 You won the flip! Your turn first.");
+            } else {
+                playerTurn = false;
+                logStatus("❌ You lost the flip. Opponent's turn first.");
+                setTimeout(botTurn, 1000); // Бот делает первый ход через секунду
+            }
+        }, 1200);
+    }, 600);
+}
+
+// Вынесли генерацию колоды в отдельную функцию
+function buildDeck() {
     pool = []; playerTiles = []; botTiles = []; board = []; gameOver = false;
     
     for (let i = 0; i <= 6; i++) {
@@ -17,11 +62,13 @@ function initGame() {
     }
 
     updateUI();
-    logStatus("Your turn! Tap a tile matching the Left or Right ends.");
     document.getElementById('bazarBtn').disabled = false;
 }
 
-// FIX: Исправлено чтение значений костяшки для правильного отображения точек
+function initGame() {
+    startWithCoinFlip(); // При загрузке страницы всегда кидаем монетку
+}
+
 function createTileDOM(tileArray, isPlayer, index) {
     const val1 = tileArray[0];
     const val2 = tileArray[1];
@@ -41,7 +88,6 @@ function createTileDOM(tileArray, isPlayer, index) {
     return div;
 }
 
-// FIX: Исправлены вызовы отрисовки под обновленную функцию createTileDOM
 function updateUI() {
     const pHand = document.getElementById('playerHand');
     pHand.innerHTML = '';
@@ -93,7 +139,7 @@ function getOpenEnds() {
 }
 
 function tryPlayTile(idx) {
-    if (gameOver) return;
+    if (gameOver || !playerTurn) return; // Защита от хода в чужой ход
     const tile = playerTiles[idx];
     const ends = getOpenEnds();
 
@@ -110,7 +156,7 @@ function tryPlayTile(idx) {
         endTurn();
     } else if (tile[1] === ends.right) {
         playerTiles.splice(idx, 1);
-        board.push([tile[1], tile[0]]); // Переворот костяшки
+        board.push([tile[1], tile[0]]);
         endTurn();
     } else if (tile[1] === ends.left) {
         playerTiles.splice(idx, 1);
@@ -118,7 +164,7 @@ function tryPlayTile(idx) {
         endTurn();
     } else if (tile[0] === ends.left) {
         playerTiles.splice(idx, 1);
-        board.unshift([tile[1], tile[0]]); // Переворот костяшки
+        board.unshift([tile[1], tile[0]]);
         endTurn();
     } else {
         alert("This tile doesn't match Left or Right ends!");
@@ -129,6 +175,7 @@ function endTurn() {
     updateUI();
     if (checkWin()) return;
     
+    playerTurn = false;
     logStatus("Opponent is choosing a move...");
     setTimeout(botTurn, 800);
 }
@@ -136,6 +183,15 @@ function endTurn() {
 function botTurn() {
     if (gameOver) return;
     const ends = getOpenEnds();
+    
+    if (!ends) { // Если бот ходит самым первым после выигрыша монетки
+        const tile = botTiles.pop();
+        board.push(tile);
+        updateUI();
+        playerTurn = true;
+        logStatus("Your turn!");
+        return;
+    }
     
     let matchIdx = botTiles.findIndex(t => t[0] === ends.right || t[1] === ends.right || t[0] === ends.left || t[1] === ends.left);
 
@@ -150,6 +206,7 @@ function botTurn() {
         
         updateUI();
         if (checkWin()) return;
+        playerTurn = true;
         logStatus("Your turn!");
     } else {
         if (pool.length > 0) {
@@ -157,13 +214,14 @@ function botTurn() {
             updateUI();
             botTurn();
         } else {
+            playerTurn = true;
             logStatus("Bot skipped a turn (no tiles in market)! Your turn.");
         }
     }
 }
 
 function takeFromBazar() {
-    if (gameOver || pool.length === 0) return;
+    if (gameOver || pool.length === 0 || !playerTurn) return;
     playerTiles.push(pool.pop());
     updateUI();
     if (pool.length === 0) document.getElementById('bazarBtn').disabled = true;

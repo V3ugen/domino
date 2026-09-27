@@ -6,8 +6,41 @@
     <title>Classic Dominoes with Dots</title>
     <!-- CONNECTING STYLESHEET -->
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* Стиль для окна выбора монеты */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); z-index: 2000;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .modal-box {
+            background: #333; padding: 25px; border-radius: 10px;
+            text-align: center; max-width: 300px; width: 90%;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5); border: 1px solid #444;
+        }
+        .modal-box h3 { margin-top: 0; color: #007bff; font-size: 1.3em; }
+        .modal-buttons { display: flex; gap: 10px; margin-top: 20px; }
+        .modal-buttons button { padding: 12px; font-size: 1em; }
+        .coin-animation {
+            font-size: 3em; margin: 15px 0; min-height: 1.2em;
+            transition: transform 0.5s ease;
+        }
+    </style>
 </head>
 <body>
+
+<!-- ОКНО ПОДБРАСЫВАНИЯ МОНЕТЫ -->
+<div id="coinModal" class="modal-overlay">
+    <div class="modal-box">
+        <h3>Coin Flip</h3>
+        <p>Choose your side to see who goes first:</p>
+        <div id="coinVisual" class="coin-animation">🪙</div>
+        <div class="modal-buttons">
+            <button onclick="chooseCoin('Heads')">Heads</button>
+            <button onclick="chooseCoin('Tails')">Tails</button>
+        </div>
+    </div>
+</div>
 
 <div class="game-container">
     <h2>Dominoes</h2>
@@ -33,7 +66,7 @@
     <!-- Control Buttons -->
     <div class="controls">
         <button id="bazarBtn" class="bazar-btn" onclick="takeFromBazar()">Market (<span id="bazarCount">14</span>)</button>
-        <button id="restartBtn" onclick="initGame()">Restart</button>
+        <button id="restartBtn" onclick="startWithCoinFlip()">Restart</button>
     </div>
 </div>
 
