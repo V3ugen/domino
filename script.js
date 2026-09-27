@@ -1,19 +1,16 @@
 let pool = [], playerTiles = [], botTiles = [], board = [];
 let gameOver = false;
 
-// 9-cell dots element layout grid shell template
 const dotsTemplate = Array(9).fill('<div class="dot"></div>').join('');
 
 function initGame() {
     pool = []; playerTiles = []; botTiles = []; board = []; gameOver = false;
     
-    // Generating classic 28 tile chain pieces pool
     for (let i = 0; i <= 6; i++) {
         for (let j = i; j <= 6; j++) { pool.push([i, j]); }
     }
     pool.sort(() => Math.random() - 0.5);
 
-    // Initial Dealing
     for (let i = 0; i < 7; i++) {
         playerTiles.push(pool.pop());
         botTiles.push(pool.pop());
@@ -24,8 +21,10 @@ function initGame() {
     document.getElementById('bazarBtn').disabled = false;
 }
 
-// Generate tile structure DOM elements with dot grid binding
-function createTileDOM(val1, val2, isPlayer, index) {
+// FIX: Исправлено чтение значений костяшки для правильного отображения точек
+function createTileDOM(tileArray, isPlayer, index) {
+    const val1 = tileArray[0];
+    const val2 = tileArray[1];
     const div = document.createElement('div');
     const isDouble = val1 === val2;
     div.className = `domino ${isDouble ? 'double' : ''}`;
@@ -42,14 +41,12 @@ function createTileDOM(val1, val2, isPlayer, index) {
     return div;
 }
 
-// Render dynamic elements loops layout structures updates
+// FIX: Исправлены вызовы отрисовки под обновленную функцию createTileDOM
 function updateUI() {
-    // Player hand layout execution loop
     const pHand = document.getElementById('playerHand');
     pHand.innerHTML = '';
-    playerTiles.forEach((tile, idx) => pHand.appendChild(createTileDOM(tile[0], tile[1], true, idx)));
+    playerTiles.forEach((tile, idx) => pHand.appendChild(createTileDOM(tile, true, idx)));
 
-    // Opponent hidden deck shell rendering execution loop
     const bHand = document.getElementById('botHand');
     bHand.innerHTML = '';
     botTiles.forEach(() => {
@@ -60,7 +57,6 @@ function updateUI() {
     document.getElementById('botCount').textContent = botTiles.length;
     document.getElementById('bazarCount').textContent = pool.length;
 
-    // Center field chain stack table rendering loops
     const boardZone = document.getElementById('board');
     boardZone.innerHTML = '';
     
@@ -68,10 +64,9 @@ function updateUI() {
         const wrapper = document.createElement('div');
         wrapper.className = 'board-tile-wrapper';
         
-        const tileDOM = createTileDOM(tile[0], tile[1], false, null);
+        const tileDOM = createTileDOM(tile, false, null);
         wrapper.appendChild(tileDOM);
         
-        // Edge markers text node appends tracking anchors conditions logic
         if (idx === 0 && board.length > 1) {
             const label = document.createElement('span');
             label.className = 'edge-label';
@@ -109,14 +104,13 @@ function tryPlayTile(idx) {
         return;
     }
 
-    // Play checking matching conditions matching side rules flow
     if (tile[0] === ends.right) {
         playerTiles.splice(idx, 1);
         board.push(tile);
         endTurn();
     } else if (tile[1] === ends.right) {
         playerTiles.splice(idx, 1);
-        board.push([tile[1], tile[0]]);
+        board.push([tile[1], tile[0]]); // Переворот костяшки
         endTurn();
     } else if (tile[1] === ends.left) {
         playerTiles.splice(idx, 1);
@@ -124,7 +118,7 @@ function tryPlayTile(idx) {
         endTurn();
     } else if (tile[0] === ends.left) {
         playerTiles.splice(idx, 1);
-        board.unshift([tile[1], tile[0]]);
+        board.unshift([tile[1], tile[0]]); // Переворот костяшки
         endTurn();
     } else {
         alert("This tile doesn't match Left or Right ends!");
@@ -143,7 +137,7 @@ function botTurn() {
     if (gameOver) return;
     const ends = getOpenEnds();
     
-    let matchIdx = botTiles.findIndex(t => t[0] === ends.right || t[1] === ends.right || t[1] === ends.left || t[0] === ends.left);
+    let matchIdx = botTiles.findIndex(t => t[0] === ends.right || t[1] === ends.right || t[0] === ends.left || t[1] === ends.left);
 
     if (matchIdx !== -1) {
         const tile = botTiles[matchIdx];
