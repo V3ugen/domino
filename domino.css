@@ -1,0 +1,202 @@
+body { 
+    font-family: Arial, sans-serif; 
+    background-color: #222; 
+    color: #fff; 
+    margin: 0; 
+    padding: 10px; 
+    -webkit-text-size-adjust: 100%; 
+}
+.game-container { 
+    max-width: 500px; 
+    margin: 0 auto; 
+    display: flex; 
+    flex-direction: column; 
+    height: 95vh; 
+    justify-content: space-between; 
+}
+h2 { 
+    text-align: center; 
+    margin: 5px 0; 
+    color: #007bff; 
+    font-size: 1.4em; 
+}
+.status-box { 
+    background: #333; 
+    padding: 10px; 
+    border-radius: 6px; 
+    text-align: center; 
+    font-size: 0.95em; 
+    border-left: 4px solid #007bff; 
+    margin-bottom: 5px; 
+}
+
+/* EXPANDED GAME BOARD */
+.board-zone { 
+    flex: 1; 
+    background: #1a1a1a; 
+    border: 2px dashed #444; 
+    border-radius: 8px; 
+    margin: 3px 0; 
+    padding: 15px 8px; 
+    display: flex; 
+    flex-wrap: wrap; 
+    align-items: center; 
+    justify-content: center; 
+    gap: 14px 5px; 
+    overflow-y: auto; 
+    align-content: flex-start; 
+}
+
+/* COMPACT TILES SIZES */
+.domino { 
+    display: inline-flex; 
+    width: 56px;  
+    height: 30px; 
+    background: #fbfbfb; 
+    color: #000; 
+    border: 1.5px solid #111; 
+    border-radius: 4px; 
+    cursor: pointer; 
+    position: relative; 
+    box-shadow: 0 2px 4px rgba(0,0,0,0.4); 
+    box-sizing: border-box; 
+    -webkit-tap-highlight-color: transparent; 
+    flex-direction: row; 
+    align-items: center;
+}
+
+/* Vertical Double */
+.domino.double { 
+    width: 30px; 
+    height: 56px; 
+    flex-direction: column; 
+}
+
+/* Tile Halves Sizing for Dots Grid */
+.domino .half { 
+    width: 50%; 
+    height: 100%; 
+    display: grid; 
+    grid-template-columns: repeat(3, 20%); 
+    grid-template-rows: repeat(3, 20%); 
+    gap: 10%; 
+    padding: 0; 
+    box-sizing: border-box; 
+    position: relative; 
+    align-content: center; 
+    justify-content: center;
+}
+.domino.double .half { 
+    width: 100%; 
+    height: 50%; 
+}
+
+/* Central Split Line */
+.domino .line { 
+    width: 1.5px; 
+    height: 80%; 
+    background: #333; 
+    align-self: center;
+}
+.domino.double .line { 
+    width: 80%; 
+    height: 1.5px; 
+    justify-self: center;
+}
+
+/* Compact Dot Matrix */
+.dot { 
+    width: 4px; 
+    height: 4px; 
+    background-color: #000; 
+    border-radius: 50%; 
+    display: none; 
+    align-self: center;
+    justify-self: center;
+}
+
+/* Dot Positions Grid Rendering (1-6) */
+.p1 .dot:nth-child(5) { display: block; }
+.p2 .dot:nth-child(1), .p2 .dot:nth-child(9) { display: block; }
+.p3 .dot:nth-child(1), .p3 .dot:nth-child(5), .p3 .dot:nth-child(9) { display: block; }
+.p4 .dot:nth-child(1), .p4 .dot:nth-child(3), .p4 .dot:nth-child(7), .p4 .dot:nth-child(9) { display: block; }
+.p5 .dot:nth-child(1), .p5 .dot:nth-child(3), .p5 .dot:nth-child(5), .p5 .dot:nth-child(7), .p5 .dot:nth-child(9) { display: block; }
+.p6 .dot:nth-child(1), .p6 .dot:nth-child(3), .p6 .dot:nth-child(4), .p6 .dot:nth-child(6), .p6 .dot:nth-child(7), .p6 .dot:nth-child(9) { display: block; }
+
+/* Chain Edges Indicators */
+.board-tile-wrapper { 
+    position: relative; 
+    display: inline-flex; 
+    align-items: center; 
+    justify-content: center;
+}
+.edge-label { 
+    position: absolute; 
+    top: -16px; 
+    left: 50%; 
+    transform: translateX(-50%); 
+    font-size: 0.65em; 
+    background: #007bff; 
+    color: #fff; 
+    padding: 1px 5px; 
+    border-radius: 3px; 
+    font-weight: bold; 
+    text-transform: uppercase; 
+    z-index: 10; 
+}
+
+/* Hands Zones */
+.hand-zone { 
+    background: #2a2a2a; 
+    padding: 10px; 
+    border-radius: 6px; 
+    margin-top: 5px; 
+}
+.hand-title { 
+    font-size: 0.85em; 
+    color: #aaa; 
+    margin-bottom: 5px; 
+    font-weight: bold; 
+}
+.tiles-container { 
+    display: flex; 
+    overflow-x: auto; 
+    padding: 10px 0; 
+    gap: 8px; 
+    align-items: center;
+    -webkit-overflow-scrolling: touch; 
+}
+
+/* Player Hand Scale adjustment */
+.tiles-container .domino { 
+    transform: scale(1.05); 
+    margin: 0 2px; 
+    flex-shrink: 0; 
+}
+
+.bot-tiles { display: flex; gap: 6px; align-items: center; }
+.bot-tile-hidden { 
+    width: 25px; 
+    height: 38px; 
+    background: linear-gradient(135deg, #444, #333); 
+    border: 1.5px solid #555; 
+    border-radius: 4px; 
+    box-shadow: inset 0 0 5px rgba(0,0,0,0.5); 
+}
+
+/* Interface Controls */
+.controls { display: flex; gap: 10px; margin-top: 8px; }
+button { 
+    flex: 1; 
+    padding: 14px; 
+    background: #007bff; 
+    border: none; 
+    color: #fff; 
+    font-size: 16px; 
+    font-weight: bold; 
+    border-radius: 6px; 
+    cursor: pointer; 
+    -webkit-tap-highlight-color: transparent; 
+}
+button:disabled { background: #555; color: #aaa; cursor: not-allowed; }
+button.bazar-btn { background: #28a745; }

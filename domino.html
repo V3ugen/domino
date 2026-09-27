@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Classic Dominoes with Dots</title>
+    <!-- CONNECTING STYLES -->
+    <link rel="stylesheet" href="domino.css">
+</head>
+<body>
+
+<div class="game-container">
+    <h2>Dominoes</h2>
+    
+    <!-- Bot's Hand -->
+    <div class="hand-zone">
+        <div class="hand-title">Opponent (Bot) Tiles: <span id="botCount">7</span></div>
+        <div id="botHand" class="bot-tiles"></div>
+    </div>
+
+    <!-- Game Status Display -->
+    <div id="status" class="status-box">Game Loading...</div>
+
+    <!-- Expanded Game Board with Wrap -->
+    <div id="board" class="board-zone"></div>
+
+    <!-- Player's Hand -->
+    <div class="hand-zone">
+        <div class="hand-title">Your Tiles (Click to play):</div>
+        <div id="playerHand" class="tiles-container"></div>
+    </div>
+
+    <!-- Control Buttons -->
+    <div class="controls">
+        <button id="bazarBtn" class="bazar-btn" onclick="takeFromBazar()">Market (<span id="bazarCount">14</span>)</button>
+        <button id="restartBtn" onclick="initGame()">Restart</button>
+    </div>
+</div>
+
+<!-- CONNECTING GAME LOGIC -->
+<script src="domino.js"></script>
+</body>
+</html>
