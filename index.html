@@ -6,48 +6,43 @@
     <title>Classic Dominoes with Dots</title>
     <!-- CONNECTING STYLESHEET -->
     <link rel="stylesheet" href="style.css">
-    <style>
-        /* Стиль для окна выбора монеты */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85); z-index: 2000;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .modal-box {
-            background: #333; padding: 25px; border-radius: 10px;
-            text-align: center; max-width: 300px; width: 90%;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5); border: 1px solid #444;
-        }
-        .modal-box h3 { margin-top: 0; color: #007bff; font-size: 1.3em; }
-        .modal-buttons { display: flex; gap: 10px; margin-top: 20px; }
-        .modal-buttons button { padding: 12px; font-size: 1em; }
-        .coin-animation {
-            font-size: 3em; margin: 15px 0; min-height: 1.2em;
-            transition: transform 0.5s ease;
-        }
-    </style>
 </head>
 <body>
 
-<!-- ОКНО ПОДБРАСЫВАНИЯ МОНЕТЫ -->
+<!-- COIN FLIP MODAL -->
 <div id="coinModal" class="modal-overlay">
     <div class="modal-box">
-        <h3>Coin Flip</h3>
-        <p>Choose your side to see who goes first:</p>
+        <h3 data-i18n="modalTitle">Coin Flip</h3>
+        <p data-i18n="modalDesc">Choose your side to see who goes first:</p>
         <div id="coinVisual" class="coin-animation">🪙</div>
         <div class="modal-buttons">
-            <button onclick="chooseCoin('Heads')">Heads</button>
-            <button onclick="chooseCoin('Tails')">Tails</button>
+            <button onclick="chooseCoin('Heads')" data-i18n="headsBtn">Heads</button>
+            <button onclick="chooseCoin('Tails')" data-i18n="tailsBtn">Tails</button>
+        </div>
+    </div>
+</div>
+
+<!-- CHOOSE SIDE MODAL (LEFT / RIGHT) -->
+<div id="choiceModal" class="modal-overlay" style="display: none;">
+    <div class="modal-box">
+        <h3 data-i18n="choiceTitle">Select Side</h3>
+        <p data-i18n="choiceDesc">This tile matches both ends. Where do you want to place it?</p>
+        <div class="modal-buttons">
+            <button onclick="playToSelectedSide('left')" data-i18n="left">Left</button>
+            <button onclick="playToSelectedSide('right')" data-i18n="right" style="background-color: #28a745;">Right</button>
         </div>
     </div>
 </div>
 
 <div class="game-container">
-    <h2>Dominoes</h2>
+    <div class="header-bar">
+        <h2 data-i18n="gameTitle">Dominoes</h2>
+        <button class="lang-btn" onclick="toggleLanguage()" id="langBtn">RU</button>
+    </div>
     
     <!-- Bot's Hand -->
     <div class="hand-zone">
-        <div class="hand-title">Opponent (Bot) Tiles: <span id="botCount">7</span></div>
+        <div class="hand-title"><span data-i18n="botTitle">Opponent (Bot) Tiles:</span> <span id="botCount">7</span></div>
         <div id="botHand" class="bot-tiles"></div>
     </div>
 
@@ -59,18 +54,19 @@
 
     <!-- Player's Hand -->
     <div class="hand-zone">
-        <div class="hand-title">Your Tiles (Click to play):</div>
+        <div class="hand-title" data-i18n="playerTitle">Your Tiles (Click to play):</div>
         <div id="playerHand" class="tiles-container"></div>
     </div>
 
     <!-- Control Buttons -->
     <div class="controls">
-        <button id="bazarBtn" class="bazar-btn" onclick="takeFromBazar()">Market (<span id="bazarCount">14</span>)</button>
-        <button id="restartBtn" onclick="startWithCoinFlip()">Restart</button>
+        <button id="bazarBtn" class="bazar-btn" onclick="takeFromBazar()"><span data-i18n="marketBtn">Market</span> (<span id="bazarCount">14</span>)</button>
+        <button id="restartBtn" onclick="startWithCoinFlip()" data-i18n="restartBtn">Restart</button>
     </div>
 </div>
 
-<!-- CONNECTING GAME LOGIC -->
+<!-- CONNECTING DATA AND LOGIC -->
+<script src="domino-data.js"></script>
 <script src="script.js"></script>
 </body>
 </html>

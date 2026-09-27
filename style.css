@@ -72,7 +72,7 @@ h2 {
     flex-direction: column; 
 }
 
-/* Tile Halves Sizing for Dots Grid */
+/* Tile Halves Sizing for Dots Grid (3x3) */
 .domino .half { 
     width: 50%; 
     height: 100%; 
@@ -115,26 +115,55 @@ h2 {
     justify-self: center;
 }
 
-/* Dot Positions Grid Rendering (1-6) */
-.p1 .dot:nth-child(5) { display: block; }
-.p2 .dot:nth-child(1), .p2 .dot:nth-child(9) { display: block; }
-.p3 .dot:nth-child(1), .p3 .dot:nth-child(5), .p3 .dot:nth-child(9) { display: block; }
-.p4 .dot:nth-child(1), .p4 .dot:nth-child(3), .p4 .dot:nth-child(7), .p4 .dot:nth-child(9) { display: block; }
-.p5 .dot:nth-child(1), .p5 .dot:nth-child(3), .p5 .dot:nth-child(5), .p5 .dot:nth-child(7), .p5 .dot:nth-child(9) { display: block; }
-.p6 .dot:nth-child(1), .p6 .dot:nth-child(3), .p6 .dot:nth-child(4), .p6 .dot:nth-child(6), .p6 .dot:nth-child(7), .p6 .dot:nth-child(9) { display: block; }
+/* 
+   ИСПРАВЛЕНО: Правильная традиционная логика отрисовки точек в сетке 3х3:
+   Ячейки нумеруются слева направо, сверху вниз:
+   1 2 3
+   4 5 6
+   7 8 9
+*/
+.p0 .dot { display: none; } 
 
-/* Chain Edges Indicators */
+/* 1: Точка в самом центре */
+.p1 .dot:nth-child(5) { display: block; }
+
+/* 2: Две точки по диагонали (из угла в угол) */
+.p2 .dot:nth-child(1), 
+.p2 .dot:nth-child(9) { display: block; }
+
+/* 3: От одного конца половины до другого по диагонали (1 + 2) */
+.p3 .dot:nth-child(1), 
+.p3 .dot:nth-child(5), 
+.p3 .dot:nth-child(9) { display: block; }
+
+/* 4: Четыре точки строго по углам */
+.p4 .dot:nth-child(1), 
+.p4 .dot:nth-child(3), 
+.p4 .dot:nth-child(7), 
+.p4 .dot:nth-child(9) { display: block; }
+
+/* 5: Квадрат по углам и одна точка в центре (4 + 1) */
+.p5 .dot:nth-child(1), 
+.p5 .dot:nth-child(3), 
+.p5 .dot:nth-child(5), 
+.p5 .dot:nth-child(7), 
+.p5 .dot:nth-child(9) { display: block; }
+
+/* 6: С каждой стороны вертикально по три точки (левый и правый ряд флангов) */
+.p6 .dot:nth-child(1), .p6 .dot:nth-child(4), .p6 .dot:nth-child(7), 
+.p6 .dot:nth-child(3), .p6 .dot:nth-child(6), .p6 .dot:nth-child(9) { display: block; }
+
+
 .board-tile-wrapper { 
-    position: relative; 
     display: inline-flex; 
+    flex-direction: column;
     align-items: center; 
-    justify-content: center;
+    justify-content: flex-end;
+    gap: 3px;
+    position: relative;
 }
+
 .edge-label { 
-    position: absolute; 
-    top: -16px; 
-    left: 50%; 
-    transform: translateX(-50%); 
     font-size: 0.65em; 
     background: #007bff; 
     color: #fff; 
@@ -142,7 +171,249 @@ h2 {
     border-radius: 3px; 
     font-weight: bold; 
     text-transform: uppercase; 
-    z-index: 10; 
+    white-space: nowrap;
+}
+
+/* Hands Zones */
+.hand-zone { 
+    background: #2a2a2a; 
+    padding: 10px; 
+    border-radius: 6px; 
+    margin-top: 5px; 
+}
+body { 
+    font-family: 'Segoe UI', Arial, sans-serif; 
+    background-color: #1e1e24; 
+    color: #fff; 
+    margin: 0; 
+    padding: 10px; 
+    -webkit-text-size-adjust: 100%; 
+}
+.game-container { 
+    max-width: 500px; 
+    margin: 0 auto; 
+    display: flex; 
+    flex-direction: column; 
+    height: 95vh; 
+    justify-content: space-between; 
+}
+
+/* Header bar */
+.header-bar {
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center;
+    margin: 5px 0; 
+    position: relative;
+}
+h2 { 
+    text-align: center; 
+    margin: 5px 0; 
+    color: #007bff; 
+    font-size: 1.4em; 
+}
+.lang-btn {
+    background: #444; 
+    border: 1px solid #555; 
+    color: #fff;
+    padding: 5px 10px; 
+    font-size: 0.85em; 
+    font-weight: bold;
+    border-radius: 4px; 
+    cursor: pointer;
+}
+.lang-btn:hover { 
+    background: #007bff; 
+    border-color: #007bff; 
+}
+
+.status-box { 
+    background: #333; 
+    padding: 10px; 
+    border-radius: 6px; 
+    text-align: center; 
+    font-size: 0.95em; 
+    border-left: 4px solid #007bff; 
+    margin-bottom: 5px; 
+}
+
+/* EXPANDED GAME BOARD */
+.board-zone { 
+    flex: 1; 
+    background: #1a1a1a; 
+    border: 2px dashed #444; 
+    border-radius: 8px; 
+    margin: 3px 0; 
+    padding: 15px 8px; 
+    display: flex; 
+    flex-wrap: wrap; 
+    align-items: center; 
+    justify-content: center; 
+    gap: 14px 5px; 
+    overflow-y: auto; 
+    align-content: flex-start; 
+}
+
+/* COMPACT TILES SIZES (Horizontal by default on board) */
+.domino { 
+    display: inline-flex; 
+    width: 56px;  
+    height: 30px; 
+    background: #fbfbfb; 
+    color: #000; 
+    border: 1.5px solid #111; 
+    border-radius: 4px; 
+    cursor: pointer; 
+    position: relative; 
+    box-shadow: 0 2px 4px rgba(0,0,0,0.4); 
+    box-sizing: border-box; 
+    -webkit-tap-highlight-color: transparent; 
+    flex-direction: row; 
+    align-items: center;
+}
+
+/* Vertical Double (Stands vertically on board) */
+.domino.double { 
+    width: 30px; 
+    height: 56px; 
+    flex-direction: column; 
+}
+
+/* In the hand zones, tiles stand vertically like in the photo */
+.hand-zone .domino {
+    width: 30px;
+    height: 56px;
+    flex-direction: column;
+}
+/* Horizontal line split for vertical tiles in hand */
+.hand-zone .domino .line { 
+    width: 80%; 
+    height: 1.5px; 
+    justify-self: center; 
+}
+
+/* Tile Halves Sizing for Dots Grid (3x3) */
+.domino .half { 
+    width: 100%; 
+    height: 100%; 
+    display: grid; 
+    grid-template-columns: repeat(3, 20%); 
+    grid-template-rows: repeat(3, 20%); 
+    gap: 10%; 
+    padding: 0; 
+    box-sizing: border-box; 
+    position: relative; 
+    align-content: center; 
+    justify-content: center;
+}
+
+/* Split Line with Pin center dot */
+.domino .line { 
+    width: 1.5px; 
+    height: 80%; 
+    background: #333; 
+    align-self: center;
+    position: relative;
+}
+.domino.double .line { 
+    width: 80%; 
+    height: 1.5px; 
+    justify-self: center;
+}
+.domino .line::after {
+    content: ''; 
+    position: absolute; 
+    left: 50%; 
+    top: 50%;
+    transform: translate(-50%, -50%); 
+    width: 3px; 
+    height: 3px;
+    background: #b59410; 
+    border-radius: 50%; 
+    border: 0.3px solid #000;
+}
+
+/* Compact Dot Matrix */
+.dot { 
+    width: 4px; 
+    height: 4px; 
+    background-color: #000; 
+    border-radius: 50%; 
+    display: none; 
+    align-self: center;
+    justify-self: center;
+}
+
+/* Dynamic dot layout configuration based on orientation status */
+.p0 .dot { display: none; } 
+
+/* 1: Center */
+.p1 .dot:nth-child(5) { display: block; }
+
+/* 2: Horizontal center row on board, Vertical center column for doubles/hand */
+.domino:not(.double) .p2 .dot:nth-child(4),
+.domino:not(.double) .p2 .dot:nth-child(6) { display: block; }
+
+.hand-zone .domino .p2 .dot:nth-child(4),
+.hand-zone .domino .p2 .dot:nth-child(6) { display: none; }
+
+.domino.double .p2 .dot:nth-child(2),
+.domino.double .p2 .dot:nth-child(8),
+.hand-zone .domino .p2 .dot:nth-child(2),
+.hand-zone .domino .p2 .dot:nth-child(8) { display: block; }
+
+/* 3: Diagonal / on board, Diagonal \ for hand and doubles */
+.domino:not(.double) .p3 .dot:nth-child(3),
+.domino:not(.double) .p3 .dot:nth-child(5),
+.domino:not(.double) .p3 .dot:nth-child(7) { display: block; }
+
+.hand-zone .domino .p3 .dot:nth-child(3),
+.hand-zone .domino .p3 .dot:nth-child(7) { display: none; }
+
+.domino.double .p3 .dot:nth-child(1),
+.domino.double .p3 .dot:nth-child(5),
+.domino.double .p3 .dot:nth-child(9),
+.hand-zone .domino .p3 .dot:nth-child(1),
+.hand-zone .domino .p3 .dot:nth-child(9) { display: block; }
+
+/* 4: Four corners */
+.p4 .dot:nth-child(1), .p4 .dot:nth-child(3), 
+.p4 .dot:nth-child(7), .p4 .dot:nth-child(9) { display: block; }
+
+/* 5: Four corners + center */
+.p5 .dot:nth-child(1), .p5 .dot:nth-child(3), 
+.p5 .dot:nth-child(5), 
+.p5 .dot:nth-child(7), .p5 .dot:nth-child(9) { display: block; }
+
+/* 6: Horizontal rows on board, Vertical rows for doubles/hand */
+.domino:not(.double) .p6 .dot:nth-child(1), .domino:not(.double) .p6 .dot:nth-child(2), .domino:not(.double) .p6 .dot:nth-child(3),
+.domino:not(.double) .p6 .dot:nth-child(7), .domino:not(.double) .p6 .dot:nth-child(8), .domino:not(.double) .p6 .dot:nth-child(9) { display: block; } 
+
+.hand-zone .domino .p6 .dot { display: none; }
+
+.domino.double .p6 .dot:nth-child(1), .domino.double .p6 .dot:nth-child(4), .domino.double .p6 .dot:nth-child(7),
+.domino.double .p6 .dot:nth-child(3), .domino.double .p6 .dot:nth-child(6), .domino.double .p6 .dot:nth-child(9),
+.hand-zone .domino .p6 .dot:nth-child(1), .hand-zone .domino .p6 .dot:nth-child(4), .hand-zone .domino .p6 .dot:nth-child(7),
+.hand-zone .domino .p6 .dot:nth-child(3), .hand-zone .domino .p6 .dot:nth-child(6), .hand-zone .domino .p6 .dot:nth-child(9) { display: block; } 
+
+/* Labels */
+.board-tile-wrapper { 
+    display: inline-flex; 
+    flex-direction: column;
+    align-items: center; 
+    justify-content: flex-end;
+    gap: 3px;
+    position: relative;
+}
+.edge-label { 
+    font-size: 0.65em; 
+    background: #007bff; 
+    color: #fff; 
+    padding: 1px 5px; 
+    border-radius: 3px; 
+    font-weight: bold; 
+    text-transform: uppercase; 
+    white-space: nowrap;
 }
 
 /* Hands Zones */
@@ -166,14 +437,11 @@ h2 {
     align-items: center;
     -webkit-overflow-scrolling: touch; 
 }
-
-/* Player Hand Scale adjustment */
 .tiles-container .domino { 
     transform: scale(1.05); 
     margin: 0 2px; 
     flex-shrink: 0; 
 }
-
 .bot-tiles { display: flex; gap: 6px; align-items: center; }
 .bot-tile-hidden { 
     width: 25px; 
@@ -184,7 +452,7 @@ h2 {
     box-shadow: inset 0 0 5px rgba(0,0,0,0.5); 
 }
 
-/* Interface Controls */
+/* Controls & Modals */
 .controls { display: flex; gap: 10px; margin-top: 8px; }
 button { 
     flex: 1; 
@@ -200,3 +468,21 @@ button {
 }
 button:disabled { background: #555; color: #aaa; cursor: not-allowed; }
 button.bazar-btn { background: #28a745; }
+
+.modal-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.85); z-index: 2000;
+    display: flex; align-items: center; justify-content: center;
+}
+.modal-box {
+    background: #333; padding: 25px; border-radius: 10px;
+    text-align: center; max-width: 300px; width: 90%;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5); border: 1px solid #444;
+}
+.modal-box h3 { margin-top: 0; color: #007bff; font-size: 1.3em; }
+.modal-buttons { display: flex; gap: 10px; margin-top: 20px; }
+.modal-buttons button { padding: 12px; font-size: 1em; }
+.coin-animation {
+    font-size: 3em; margin: 15px 0; min-height: 1.2em;
+    transition: transform 0.5s ease;
+}
