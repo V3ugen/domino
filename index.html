@@ -3,52 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Classic Dominoes with Dots</title>
-    <!-- CONNECTING STYLESHEET WITH VERSION TO FORCE UPDATE -->
-    <link rel="stylesheet" href="style.css?v=4.0">
-    <style>
-        /* Стили модальных окон */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2000;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .modal-box {
-            background: #333; padding: 25px; border-radius: 10px;
-            text-align: center; max-width: 300px; width: 90%;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5); border: 1px solid #444;
-        }
-        .modal-box h3 { margin-top: 0; color: #007bff; font-size: 1.3em; }
-        .modal-buttons { display: flex; gap: 10px; margin-top: 20px; justify-content: center; }
-        .modal-buttons button { padding: 12px 20px; font-size: 1em; font-weight: bold; }
-        .coin-animation {
-            font-size: 3em; margin: 15px 0; min-height: 1.2em;
-            transition: transform 0.5s ease;
-        }
-        /* Шапка игры */
-        .header-bar {
-            display: flex; justify-content: space-between; align-items: center;
-            margin: 5px 0; position: relative;
-        }
-        .lang-btn {
-            background: #444; border: 1px solid #555; color: #fff;
-            padding: 5px 10px; font-size: 0.85em; font-weight: bold;
-            border-radius: 4px; cursor: pointer;
-        }
-        .lang-btn:hover { background: #007bff; border-color: #007bff; }
-    </style>
+    <title>Classic Dominoes</title>
+    <link rel="stylesheet" href="style.css?v=17.0">
 </head>
 <body>
 
-<!-- ОКНО ПОДБРАСЫВАНИЯ МОНЕТЫ -->
+<!-- ЯЗЫКОВАЯ ПАНЕЛЬ -->
+<div class="lang-container" style="max-width: 500px; margin: 5px auto; display: flex; justify-content: flex-end; padding: 0 10px;">
+    <button id="langBtn" style="max-width: 70px; padding: 6px 12px; font-size: 0.85em; background-color: #333;" onclick="toggleLanguage()">RU</button>
+</div>
+
+<!-- ОКНО ПОДБРАСЫВАНИЯ МОНЕТЫ (Полностью в HTML) -->
 <div id="coinModal" class="modal-overlay">
     <div class="modal-box">
-        <h3 data-i18n="modalTitle">Coin Flip</h3>
-        <p data-i18n="modalDesc">Choose your side to see who goes first:</p>
+        <h3 id="modalTitle" data-i18n="modalTitle">Coin Flip</h3>
+        <p id="modalDesc" data-i18n="modalDesc">Choose your side to see who goes first:</p>
         <div id="coinVisual" class="coin-animation">🪙</div>
         <div class="modal-buttons">
-            <button onclick="chooseCoin('Heads')" data-i18n="headsBtn">Heads</button>
-            <button onclick="chooseCoin('Tails')" data-i18n="tailsBtn">Tails</button>
+            <button onclick="chooseCoin('Heads')" id="headsBtn" data-i18n="headsBtn">Heads</button>
+            <button onclick="chooseCoin('Tails')" id="tailsBtn" data-i18n="tailsBtn">Tails</button>
         </div>
     </div>
 </div>
@@ -56,48 +29,47 @@
 <!-- ОКНО ВЫБОРА СТОРОНЫ ХОДА -->
 <div id="choiceModal" class="modal-overlay" style="display: none;">
     <div class="modal-box">
-        <h3 data-i18n="choiceTitle">Select Side</h3>
-        <p data-i18n="choiceDesc">This tile matches both ends. Where do you want to place it?</p>
+        <h3 id="choiceTitle" data-i18n="choiceTitle">Select Side</h3>
+        <p id="choiceDesc" data-i18n="choiceDesc">This tile matches both ends. Where do you want to place it?</p>
         <div class="modal-buttons">
-            <button onclick="playToSelectedSide('left')" data-i18n="left">Left</button>
-            <button onclick="playToSelectedSide('right')" data-i18n="right" style="background-color: #28a745;">Right</button>
+            <button onclick="playToSelectedSide('left')" id="choiceLeftBtn" data-i18n="left">Left</button>
+            <button onclick="playToSelectedSide('right')" id="choiceRightBtn" data-i18n="right" style="background-color: #28a745;">Right</button>
         </div>
     </div>
 </div>
 
 <div class="game-container">
-    <div class="header-bar">
-        <h2 data-i18n="gameTitle">Dominoes</h2>
-        <button class="lang-btn" onclick="toggleLanguage()" id="langBtn">RU</button>
+    <div class="header-bar" style="margin: 5px 0;">
+        <h2 id="gameTitle" data-i18n="gameTitle">Dominoes</h2>
     </div>
     
     <!-- Рука бота -->
     <div class="hand-zone">
-        <div class="hand-title"><span data-i18n="botTitle">Opponent (Bot) Tiles:</span> <span id="botCount">7</span></div>
+        <div class="hand-title"><span id="botTitleLabel" data-i18n="botTitle">Opponent (Bot) Tiles:</span> <span id="botCount">7</span></div>
         <div id="botHand" class="bot-tiles"></div>
     </div>
 
-    <!-- Информационная панель -->
-    <div id="status" class="status-box">Game Loading...</div>
+    <!-- Информационная панель — по умолчанию выводим статус жребия монетки -->
+    <div id="status" class="status-box" data-i18n="coinFlipping">Choosing first move...</div>
 
     <!-- Игровой стол -->
     <div id="board" class="board-zone"></div>
 
     <!-- Рука игрока -->
     <div class="hand-zone">
-        <div class="hand-title" data-i18n="playerTitle">Your Tiles (Click to play):</div>
+        <div class="hand-title" id="playerTitleLabel" data-i18n="playerTitle">Your Tiles (Click to play):</div>
         <div id="playerHand" class="tiles-container"></div>
     </div>
 
     <!-- Кнопки управления -->
     <div class="controls">
-        <button id="bazarBtn" class="bazar-btn" onclick="takeFromBazar()"><span data-i18n="marketBtn">Market</span> (<span id="bazarCount">14</span>)</button>
-        <button id="restartBtn" onclick="startWithCoinFlip()" data-i18n="restartBtn">Restart</button>
+        <button id="bazarBtn" class="bazar-btn" onclick="takeFromBazar()">Market (<span id="bazarCount">14</span>)</button>
+        <button id="passBtn" onclick="playerPass()" style="display: none; background-color: #e0a800;" data-i18n="passBtn">Skip Turn</button>
+        <button id="restartBtn" onclick="restartGame()" data-i18n="restartBtn">Restart</button>
     </div>
 </div>
 
-<!-- ПОДКЛЮЧЕНИЕ СКРИПТОВ -->
-<script src="domino-data.js?v=4.0"></script>
-<script src="script.js?v=4.0"></script>
+<script src="https://jsdelivr.net"></script>
+<script src="game.js?v=17.0"></script>
 </body>
 </html>

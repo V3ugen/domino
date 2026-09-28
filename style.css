@@ -1,6 +1,6 @@
 body { 
     font-family: 'Segoe UI', Arial, sans-serif; 
-    background-color: #1e1e24; 
+    background-color: #1a1a1f; 
     color: #fff; 
     margin: 0; 
     padding: 10px; 
@@ -16,167 +16,164 @@ body {
 }
 
 .status-box { 
-    background: #333; 
+    background: #2a2a35; 
     padding: 10px; 
     border-radius: 6px; 
     text-align: center; 
     font-size: 0.95em; 
     border-left: 4px solid #007bff; 
     margin-bottom: 5px; 
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+    transition: all 0.3s ease;
 }
 
-/* ИГРОВОЕ ПОЛЕ */
+/* ИГРОВОЕ ПОЛЕ — ИСПРАВЛЕНО: Теперь это жесткое окно камеры авто-зума */
 .board-zone { 
     flex: 1; 
-    background: #1a1a1a; 
-    border: 2px dashed #444; 
+    background: #111115; 
+    border: 2px dashed #3a3a4a; 
     border-radius: 8px; 
     margin: 3px 0; 
-    padding: 25px 15px; 
-    display: flex; 
-    flex-wrap: wrap; 
-    align-items: center; 
-    justify-content: center; 
-    gap: 30px 20px; 
-    overflow-y: auto; 
-    align-content: center; 
+    padding: 30px 15px; 
+    overflow: hidden;         
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: inset 0 4px 20px rgba(0,0,0,0.8);
+    position: relative;
 }
 
-/* БАЗОВЫЙ ВИД КОСТЯШКИ — ВСЕГДА ВЕРТИКАЛЬНЫЙ */
-.domino { 
+/* ОБЕРТКА СЕТКИ — ИСПРАВЛЕНО НА 100%: Стабильный Flex-поток с автопереносом. Костяшки больше никогда не полезут друг на друга! */
+.board-grid-wrapper {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 16px 8px;                                    
+    width: 100%;
+    transform-origin: center center;
+    transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* БАЗОВЫЙ ВИД КОСТЯШКИ НА СТОЛЕ (Горизонтальный) */
+.board-zone .domino { 
     display: inline-flex; 
-    flex-direction: column; 
-    width: 32px;  
-    height: 60px; 
-    background: #fbfbfb; 
+    flex-direction: row; 
+    width: 60px;  
+    height: 32px; 
+    background: radial-gradient(circle at 30% 30%, #fdfdfd 0%, #f4f3ef 60%, #e6e3da 100%); 
     color: #000; 
-    border: 1.5px solid #111; 
-    border-radius: 4px; 
+    border: 1px solid #111; 
+    border-bottom: 2px solid #000;
+    border-radius: 5px; 
     cursor: pointer; 
-    position: relative; 
-    box-shadow: 0 3px 5px rgba(0,0,0,0.4); 
     box-sizing: border-box; 
-    -webkit-tap-highlight-color: transparent; 
     align-items: center;
     justify-content: space-between;
     flex-shrink: 0;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.8);
 }
 
-/* ПОЛОЖЕНИЕ НА СТОЛЕ: Обычные костяшки ротируем боком, дубли оставляем стоять ровно */
-.board-zone .domino { transform: rotate(-90deg); }
-.board-zone .domino.double { transform: rotate(0deg); }
-
-/* ИСПРАВЛЕНО: Если костяшка перевернута логикой игры, разворачиваем ее в другую сторону, чтобы точки не зеркалились */
-.board-zone .domino.flipped { transform: rotate(90deg); }
-
-/* ПОЛОВИНКИ КОСТЯШЕК (Строгие квадраты с идеальным центром) */
-.domino .half { 
-    width: 29px; 
-    height: 29px; 
-    display: grid; 
-    grid-template-columns: repeat(3, 1fr); 
-    grid-template-rows: repeat(3, 1fr); 
-    padding: 2px; 
-    box-sizing: border-box; 
-    align-content: center; 
-    justify-content: center;
-    align-items: center;
-    justify-items: center;
+/* Вертикальный дубль на поле */
+.board-zone .domino.double { 
+    width: 32px; 
+    height: 60px; 
+    flex-direction: column; 
+    background: radial-gradient(circle at 30% 20%, #fdfdfd 0%, #f4f3ef 60%, #e6e3da 100%);
 }
 
-/* Разделительная линия */
-.domino .line { 
-    width: 100%; 
-    height: 1.5px; 
-    background: #333; 
-    align-self: center;
-    flex-shrink: 0;
-}
-
-/* Точки */
-.dot { 
-    width: 4px; 
-    height: 4px; 
-    background-color: #000; 
-    border-radius: 50%; 
-    display: none; 
-}
-
-/* Единая традиционная схема точек для вертикальной костяшки */
-.p0 .dot { display: none; } 
-.p1 .dot:nth-child(5) { display: block; }
-.p2 .dot:nth-child(2), .p2 .dot:nth-child(8) { display: block; }
-.p3 .dot:nth-child(2), .p3 .dot:nth-child(5), .p3 .dot:nth-child(8) { display: block; }
-.p4 .dot:nth-child(1), .p4 .dot:nth-child(3), .p4 .dot:nth-child(7), .p4 .dot:nth-child(9) { display: block; }
-.p5 .dot:nth-child(1), .p5 .dot:nth-child(3), .p5 .dot:nth-child(5), .p5 .dot:nth-child(7), .p5 .dot:nth-child(9) { display: block; }
-.p6 .dot:nth-child(1), .p6 .dot:nth-child(4), .p6 .dot:nth-child(7), .p6 .dot:nth-child(3), .p6 .dot:nth-child(6), .p6 .dot:nth-child(9) { display: block; }
-
-/* Метки краев стола */
-.board-tile-wrapper { 
-    display: inline-flex; 
-    flex-direction: column;
-    align-items: center; 
-    justify-content: center;
-    position: relative;
-}
-.edge-label { 
-    position: absolute;
-    top: -22px;
-    font-size: 0.65em; 
-    background: #007bff; 
-    color: #fff; 
-    padding: 1px 5px; 
-    border-radius: 3px; 
-    font-weight: bold; 
-    text-transform: uppercase; 
-    white-space: nowrap;
-    z-index: 10;
-}
-
-/* Зоны рук игроков */
-.hand-zone { 
-    background: #2a2a2a; 
-    padding: 10px; 
-    border-radius: 6px; 
-    margin-top: 5px; 
-}
-.hand-title { 
-    font-size: 0.85em; 
-    color: #aaa; 
-    margin-bottom: 5px; 
-    font-weight: bold; 
-}
+/* РУКА ИГРОКА — ВЫВОД В ДВА РЯДА БЕЗ СКРОЛЛА */
 .tiles-container { 
     display: flex; 
-    overflow-x: auto; 
+    flex-wrap: wrap;          
+    gap: 12px 10px;           
+    align-items: center; 
     padding: 10px 0; 
-    gap: 12px; 
-    align-items: center;
-    -webkit-overflow-scrolling: touch; 
-}
-.bot-tiles { display: flex; gap: 6px; align-items: center; }
-.bot-tile-hidden { 
-    width: 25px; 
-    height: 48px; 
-    background: linear-gradient(135deg, #444, #333); 
-    border: 1.5px solid #555; 
-    border-radius: 4px; 
-    box-shadow: inset 0 0 5px rgba(0,0,0,0.5); 
 }
 
-/* Кнопки управления */
-.controls { display: flex; gap: 10px; margin-top: 8px; }
-button { 
-    flex: 1; 
-    padding: 14px; 
-    background: #007bff; 
-    border: none; 
-    color: #fff; 
-    font-size: 16px; 
-    font-weight: bold; 
-    border-radius: 6px; 
-    cursor: pointer; 
-    -webkit-tap-highlight-color: transparent; 
+/* ПОДСВЕТКА ПОСЛЕДНЕГО ХОДА */
+@keyframes pulse-glow {
+    0% { box-shadow: 0 0 4px #007bff, inset 0 1px 1px rgba(255,255,255,0.8); }
+    50% { box-shadow: 0 0 14px #007bff, 0 0 20px rgba(0, 123, 255, 0.5), inset 0 1px 1px rgba(255,255,255,0.9); }
+    100% { box-shadow: 0 0 4px #007bff, inset 0 1px 1px rgba(255,255,255,0.8); }
 }
-button:disabled { background: #555; color: #aaa; cursor: not-allowed; }
+.board-zone .board-tile-wrapper.last-placed .domino {
+    border: 1.5px solid #007bff !important;
+    animation: pulse-glow 2s infinite ease-in-out;
+}
+
+.hand-zone .domino {
+    display: inline-flex;
+    width: 32px;
+    height: 60px;
+    flex-direction: column;
+    background: radial-gradient(circle at 50% 20%, #fdfdfd 0%, #f4f3ef 60%, #e6e3da 100%);
+    color: #000;
+    border: 1px solid #111;
+    border-bottom: 2px solid #000;
+    border-radius: 5px; 
+    cursor: pointer;
+    box-sizing: border-box;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.8);
+    transition: transform 0.15s ease;
+}
+.hand-zone .domino:hover { transform: translateY(-4px); box-shadow: 0 10px 16px rgba(0,123,255,0.3); }
+
+/* Стили модальных окон */
+.modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2000; display: flex; align-items: center; justify-content: center; }
+.modal-box { background: #333; padding: 25px; border-radius: 10px; text-align: center; max-width: 300px; width: 90%; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border: 1px solid #444; }
+.modal-box h3 { margin-top: 0; color: #007bff; font-size: 1.3em; }
+.modal-buttons { display: flex; gap: 10px; margin-top: 20px; justify-content: center; }
+.coin-animation { font-size: 3em; margin: 15px 0; min-height: 1.2em; transition: transform 0.5s ease; }
+
+/* Половинки и разделители */
+.domino .half { width: 28px; height: 28px; position: relative; box-sizing: border-box; }
+.board-zone .domino:not(.double) .line { width: 1.5px; height: 90%; background: rgba(0, 0, 0, 0.65); flex-shrink: 0; }
+.board-zone .domino.double .line, .hand-zone .domino .line { width: 90%; height: 1.5px; background: rgba(0, 0, 0, 0.65); flex-shrink: 0; }
+.dot { position: absolute; width: 4.2px; height: 4.5px; background-color: #111; border-radius: 50%; box-shadow: inset 1px 1px 1px rgba(0,0,0,0.8), 0.5px 0.5px 0.5px rgba(255,255,255,0.7); }
+
+/* ГЕОМЕТРИЯ ТОЧЕК (0-6) */
+.p0 .dot { display: none; } 
+.p1 .dot { left: 12px; top: 12px; }
+.p2 .dot:nth-child(1) { right: 5px; top: 5px; }
+.p2 .dot:nth-child(2) { left: 5px; bottom: 5px; }
+.p3 .dot:nth-child(1) { left: 5px; top: 5px; }
+.p3 .dot:nth-child(2) { left: 12px; top: 12px; }
+.p3 .dot:nth-child(3) { right: 5px; bottom: 5px; }
+.p4 .dot:nth-child(1) { left: 4px; top: 4px; }
+.p4 .dot:nth-child(2) { right: 4px; top: 4px; }
+.p4 .dot:nth-child(3) { left: 4px; bottom: 4px; }
+.p4 .dot:nth-child(4) { right: 4px; bottom: 4px; }
+.p5 .dot:nth-child(1) { left: 4px; top: 4px; }
+.p5 .dot:nth-child(2) { right: 4px; top: 4px; }
+.p5 .dot:nth-child(3) { left: 12px; top: 12px; }
+.p5 .dot:nth-child(4) { left: 4px; bottom: 4px; }
+.p5 .dot:nth-child(5) { right: 4px; bottom: 4px; }
+.p6 .dot:nth-child(1) { left: 4px; top: 4px; }
+.p6 .dot:nth-child(2) { left: 4px; top: 12px; }
+.p6 .dot:nth-child(3) { left: 4px; bottom: 4px; }
+.p6 .dot:nth-child(4) { right: 4px; top: 4px; }
+.p6 .dot:nth-child(5) { right: 4px; top: 12px; }
+.p6 .dot:nth-child(6) { right: 4px; bottom: 4px; }
+
+/* АНИМАЦИИ ПОБЕДЫ И ПОРАЖЕНИЯ */
+@keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
+.status-box.defeat-animation { background: #4a1515 !important; border-left: 4px solid #ff3333 !important; animation: shake 0.5s ease-in-out 2; box-shadow: 0 0 15px rgba(255, 0, 0, 0.4); }
+.status-box.victory-animation { background: #154a1d !important; border-left: 4px solid #28a745 !important; box-shadow: 0 0 20px rgba(40, 167, 69, 0.6); transform: scale(1.02); }
+
+.board-tile-wrapper { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
+.edge-label { position: absolute; top: -20px; font-size: 0.65em; background: #007bff; color: #fff; padding: 2px 6px; border-radius: 3px; font-weight: bold; text-transform: uppercase; white-space: nowrap; z-index: 10; box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+
+.hand-zone { background: #23232a; padding: 10px; border-radius: 6px; margin-top: 5px; box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
+.hand-title { font-size: 0.85em; color: #aaa; margin-bottom: 5px; font-weight: bold; }
+.bot-tiles { display: flex; gap: 6px; align-items: center; }
+.bot-tile-hidden { width: 25px; height: 48px; background: linear-gradient(135deg, #3a3a42, #1e1e24); border: 1px solid #444; border-radius: 4px; box-shadow: inset 0 0 5px rgba(0,0,0,0.8), 0 2px 4px rgba(0,0,0,0.4); }
+.controls { display: flex; gap: 10px; margin-top: 8px; }
+button { flex: 1; padding: 14px; background: #007bff; border: none; color: #fff; font-size: 16px; font-weight: bold; border-radius: 6px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+button:hover { background: #0069d9; }
+button:disabled { background: #444; color: #888; cursor: not-allowed; box-shadow: none; }
 button.bazar-btn { background: #28a745; }
+button.bazar-btn:hover { background: #218838; }
