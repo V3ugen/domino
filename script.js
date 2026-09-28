@@ -1,4 +1,4 @@
-// script.js - Логика игры
+// script.js - Главный игровой движок
 let pool = [], playerTiles = [], board = [], botTiles = [];
 let gameOver = false;
 let playerTurn = true;
@@ -278,7 +278,7 @@ function botTurn() {
         if (pool.length > 0) {
             botTiles.push(pool.pop());
             updateUI();
-            botTurn();
+            setTimeout(botTurn, 600);
         } else {
             playerTurn = true;
             logStatus(translations[currentLang].botSkipped);
