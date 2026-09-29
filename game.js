@@ -26,60 +26,20 @@ function logStatus(msg) {
 // ИСПРАВЛЕНО НА 100%: Извлечение крайних элементов через безопасные методы .slice(), никаких багов с длинами массивов!
 function getOpenEnds() {
     if (board.length === 0) return null;
-    
-    // Если на столе всего одна костяшка
-    if (board.length === 1) {
-        const tStr = board.slice(0)[0].tile;
-        const dash = tStr.indexOf('-');
-        return { 
-            left: parseInt(tStr.substring(0, dash)), 
-            right: parseInt(tStr.substring(dash + 1)) 
-        };
+
+    // Каждая костяшка на столе хранится вместе с ориентацией (isFlipped):
+    // слева на экране всегда val1, справа val2. Края берём прямо из неё.
+    function shown(item) {
+        const d = item.tile.indexOf('-');
+        const a = parseInt(item.tile.substring(0, d));
+        const b = parseInt(item.tile.substring(d + 1));
+        return item.isFlipped ? { l: b, r: a } : { l: a, r: b };
     }
 
-    // --- НАХОДИМ РЕАЛЬНЫЙ ЛЕВЫЙ КРАЙ ---
-    const firstTileObj = board.slice(0)[0];
-    const secondTileObj = board.slice(1)[0];
-    
-    const fStr = firstTileObj.tile;
-    const fDash = fStr.indexOf('-');
-    const fSideA = parseInt(fStr.substring(0, fDash));
-    const fSideB = parseInt(fStr.substring(fDash + 1));
-    
-    const sStr = secondTileObj.tile;
-    const sDash = sStr.indexOf('-');
-    const sSideA = parseInt(sStr.substring(0, sDash));
-    const sSideB = parseInt(sStr.substring(sDash + 1));
-
-    let leftEnd = fSideA;
-    if (fSideB === sSideA || fSideB === sSideB) {
-        leftEnd = fSideA;
-    } else if (fSideA === sSideA || fSideA === sSideB) {
-        leftEnd = fSideB;
-    }
-
-    // --- НАХОДИМ РЕАЛЬНЫЙ ПРАВЫЙ КРАЙ ---
-    const lastTileObj = board.slice(-1)[0];
-    const prevTileObj = board.slice(-2)[0];
-    
-    const lStr = lastTileObj.tile;
-    const lDash = lStr.indexOf('-');
-    const lSideA = parseInt(lStr.substring(0, lDash));
-    const lSideB = parseInt(lStr.substring(lDash + 1));
-    
-    const pStr = prevTileObj.tile;
-    const pDash = pStr.indexOf('-');
-    const pSideA = parseInt(pStr.substring(0, pDash));
-    const pSideB = parseInt(pStr.substring(pDash + 1));
-
-    let rightEnd = lSideB;
-    if (lSideA === pSideA || lSideA === pSideB) {
-        rightEnd = lSideB;
-    } else if (lSideB === pSideA || lSideB === pSideB) {
-        rightEnd = lSideA;
-    }
-
-    return { left: leftEnd, right: rightEnd };
+    return {
+        left: shown(board[0]).l,
+        right: shown(board[board.length - 1]).r
+    };
 }
 // game.js (Часть 2 из 4) — Генерация HTML-кода костяшек и механика Авто-Зума
 function getDotsTemplate(count) {
@@ -335,6 +295,7 @@ function endTurn() {
 
 function botTurn() {
     if (gameOver) return;
+    if (checkBlocked()) return;
     const ends = getOpenEnds();
     
     // Если бот выиграл жребий и ходит первым на пустую доску
@@ -345,6 +306,7 @@ function botTurn() {
         updateUI();
         playerTurn = true;
         logStatus("Ваш ход!");
+        checkPlayerPassRequirement();
         return;
     }
 
@@ -370,12 +332,13 @@ function botTurn() {
         lastPlacedTileId = tileStr;
         if (sidePlayed === 'right') board.push({ tile: tileStr, isFlipped: flip });
         else board.unshift({ tile: tileStr, isFlipped: flip });
-        updateUI(); if (checkWin()) return; playerTurn = true; logStatus("Ваш ход!");
+        updateUI(); if (checkWin()) return; if (checkBlocked()) return; playerTurn = true; logStatus("Ваш ход!"); checkPlayerPassRequirement();
     } else {
         if (pool.length > 0) {
             botTiles.push(pool.pop()); updateUI();
             setTimeout(botTurn, 600);
         } else {
+            if (checkBlocked()) return;
             playerTurn = true; logStatus("Бот пропустил ход! Ваш ход.");
             updateUI();
         }
@@ -453,6 +416,46 @@ function checkWin() {
     }
     return false;
 }
+
+// Игра «рыба»: привоз пуст и ни у кого нет хода -> подсчёт очков, меньше очков = победа
+function tileHasMove(tiles, ends) {
+    return tiles.some(function(t) {
+        const d = t.indexOf('-');
+        const a = parseInt(t.substring(0, d));
+        const b = parseInt(t.substring(d + 1));
+        return a === ends.left || b === ends.left || a === ends.right || b === ends.right;
+    });
+}
+
+function sumPips(tiles) {
+    return tiles.reduce(function(sum, t) {
+        const d = t.indexOf('-');
+        return sum + parseInt(t.substring(0, d)) + parseInt(t.substring(d + 1));
+    }, 0);
+}
+
+function checkBlocked() {
+    if (gameOver || board.length === 0 || pool.length > 0) return false;
+    const ends = getOpenEnds();
+    if (tileHasMove(playerTiles, ends) || tileHasMove(botTiles, ends)) return false;
+
+    const mine = sumPips(playerTiles);
+    const theirs = sumPips(botTiles);
+    let result;
+    if (mine < theirs) result = "🎉 Вы победили!";
+    else if (mine > theirs) result = "❌ Победил бот.";
+    else result = "🤝 Ничья!";
+
+    gameOver = true;
+    playerTurn = false;
+    logStatus("Игра заблокирована («рыба»). Очки: у вас " + mine + ", у бота " + theirs + ". " + result);
+    updateUI();
+    return true;
+}
+
+// Привязка кнопок (раньше обработчиков не было вообще)
+if (bazarBtnEl) bazarBtnEl.addEventListener('click', takeFromBazar);
+if (passBtnEl) passBtnEl.addEventListener('click', playerPass);
 
 // Запуск инициализации при загрузке страницы
 window.onload = startWithCoinFlip;
