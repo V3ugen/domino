@@ -1,75 +1,70 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Classic Dominoes</title>
-    <link rel="stylesheet" href="style.css?v=17.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Классическое Домино</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<!-- ЯЗЫКОВАЯ ПАНЕЛЬ -->
-<div class="lang-container" style="max-width: 500px; margin: 5px auto; display: flex; justify-content: flex-end; padding: 0 10px;">
-    <button id="langBtn" style="max-width: 70px; padding: 6px 12px; font-size: 0.85em; background-color: #333;" onclick="toggleLanguage()">RU</button>
-</div>
+    <div class="game-container">
+        <h1 class="game-title">Домино</h1>
+        
+        <!-- Статус-бар ходов, жребия и побед -->
+        <div id="status" class="status-box">Ждём броска монетки...</div>
 
-<!-- ОКНО ПОДБРАСЫВАНИЯ МОНЕТЫ (Полностью в HTML) -->
-<div id="coinModal" class="modal-overlay">
-    <div class="modal-box">
-        <h3 id="modalTitle" data-i18n="modalTitle">Coin Flip</h3>
-        <p id="modalDesc" data-i18n="modalDesc">Choose your side to see who goes first:</p>
-        <div id="coinVisual" class="coin-animation">🪙</div>
-        <div class="modal-buttons">
-            <button onclick="chooseCoin('Heads')" id="headsBtn" data-i18n="headsBtn">Heads</button>
-            <button onclick="chooseCoin('Tails')" id="tailsBtn" data-i18n="tailsBtn">Tails</button>
+        <!-- ИСПРАВЛЕНО: Информационная панель противника теперь закреплена СВЕРХУ игрового поля -->
+        <div class="info-panel bot-panel">
+            <span>Соперник (Бот) карт на руках: <strong id="botCount">7</strong></span>
+            <div id="botHand" class="hand-row hidden-hand"></div>
+        </div>
+
+        <!-- Игровое поле для выкладывания домино (с поддержкой авто-зума) -->
+        <div id="board-zone" class="board-zone">
+            <div id="board" class="board-lane"></div>
+        </div>
+
+        <!-- Ваша рука с костяшками (СНИЗУ экрана) -->
+        <div class="info-panel player-panel">
+            <span>Ваши костяшки (Нажмите для хода):</span>
+            <div id="playerHand" class="hand-row"></div>
+        </div>
+
+        <!-- Нижние кнопки управления -->
+        <div class="controls">
+            <!-- ИСПРАВЛЕНО: Базар переименован в Привоз -->
+            <button id="bazarBtn" class="bazar-btn">Привоз (14)</button>
+            <button id="passBtn" class="pass-btn" style="display: none;">Пропустить ход</button>
+            <button id="restartBtn" onclick="restartGame()">Заново</button>
         </div>
     </div>
-</div>
 
-<!-- ОКНО ВЫБОРА СТОРОНЫ ХОДА -->
-<div id="choiceModal" class="modal-overlay" style="display: none;">
-    <div class="modal-box">
-        <h3 id="choiceTitle" data-i18n="choiceTitle">Select Side</h3>
-        <p id="choiceDesc" data-i18n="choiceDesc">This tile matches both ends. Where do you want to place it?</p>
-        <div class="modal-buttons">
-            <button onclick="playToSelectedSide('left')" id="choiceLeftBtn" data-i18n="left">Left</button>
-            <button onclick="playToSelectedSide('right')" id="choiceRightBtn" data-i18n="right" style="background-color: #28a745;">Right</button>
+    <!-- Интегрированное в интерфейс окно жребия монетки -->
+    <div id="coinModal" class="modal-overlay" style="display: none;">
+        <div class="modal-box">
+            <h3>Бросок монеты</h3>
+            <p>Выберите сторону, чтобы узнать, кто ходит первым:</p>
+            <div id="coinVisual" class="coin-animation">🪙</div>
+            <div class="modal-buttons">
+                <button onclick="chooseCoin('Heads')">Орел</button>
+                <button onclick="chooseCoin('Tails')">Решка</button>
+            </div>
         </div>
     </div>
-</div>
 
-<div class="game-container">
-    <div class="header-bar" style="margin: 5px 0;">
-        <h2 id="gameTitle" data-i18n="gameTitle">Dominoes</h2>
-    </div>
-    
-    <!-- Рука бота -->
-    <div class="hand-zone">
-        <div class="hand-title"><span id="botTitleLabel" data-i18n="botTitle">Opponent (Bot) Tiles:</span> <span id="botCount">7</span></div>
-        <div id="botHand" class="bot-tiles"></div>
-    </div>
-
-    <!-- Информационная панель — по умолчанию выводим статус жребия монетки -->
-    <div id="status" class="status-box" data-i18n="coinFlipping">Choosing first move...</div>
-
-    <!-- Игровой стол -->
-    <div id="board" class="board-zone"></div>
-
-    <!-- Рука игрока -->
-    <div class="hand-zone">
-        <div class="hand-title" id="playerTitleLabel" data-i18n="playerTitle">Your Tiles (Click to play):</div>
-        <div id="playerHand" class="tiles-container"></div>
+    <!-- Модальное окно выбора стороны (Лево / Право) -->
+    <div id="choiceModal" class="modal-overlay" style="display: none;">
+        <div class="modal-box">
+            <h3>Выбор стороны</h3>
+            <p>Костяшка подходит к обоим краям. Куда её поставить?</p>
+            <div class="modal-buttons">
+                <button onclick="playToSelectedSide('left')">Лево</button>
+                <button onclick="playToSelectedSide('right')" style="font-weight: bold;">Право</button>
+            </div>
+        </div>
     </div>
 
-    <!-- Кнопки управления -->
-    <div class="controls">
-        <button id="bazarBtn" class="bazar-btn" onclick="takeFromBazar()">Market (<span id="bazarCount">14</span>)</button>
-        <button id="passBtn" onclick="playerPass()" style="display: none; background-color: #e0a800;" data-i18n="passBtn">Skip Turn</button>
-        <button id="restartBtn" onclick="restartGame()" data-i18n="restartBtn">Restart</button>
-    </div>
-</div>
-
-<script src="https://jsdelivr.net"></script>
-<script src="game.js?v=17.0"></script>
+    <script src="game.js"></script>
 </body>
 </html>

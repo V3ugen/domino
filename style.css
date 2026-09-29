@@ -5,175 +5,120 @@ body {
     margin: 0; 
     padding: 10px; 
     -webkit-text-size-adjust: 100%; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    box-sizing: border-box;
 }
+
 .game-container { 
+    width: 100%;
     max-width: 500px; 
     margin: 0 auto; 
     display: flex; 
     flex-direction: column; 
-    height: 95vh; 
-    justify-content: space-between; 
+    gap: 10px;
 }
+
+.game-title { text-align: center; margin: 0; font-size: 1.5em; letter-spacing: 1px; }
 
 .status-box { 
     background: #2a2a35; 
-    padding: 10px; 
+    padding: 12px; 
     border-radius: 6px; 
     text-align: center; 
     font-size: 0.95em; 
+    font-weight: bold;
     border-left: 4px solid #007bff; 
-    margin-bottom: 5px; 
     box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-    transition: all 0.3s ease;
 }
 
-/* ИГРОВОЕ ПОЛЕ — ИСПРАВЛЕНО: Теперь это жесткое окно камеры авто-зума */
 .board-zone { 
-    flex: 1; 
+    width: 100%;
+    height: 280px; /* Увеличена высота для заворачивания змейки */
     background: #111115; 
     border: 2px dashed #3a3a4a; 
     border-radius: 8px; 
-    margin: 3px 0; 
-    padding: 30px 15px; 
-    overflow: hidden;         
     display: flex;
     align-items: center;
     justify-content: center;
+    overflow: hidden; /* Прячем полосы прокрутки, так как работает авто-отдаление */
     box-shadow: inset 0 4px 20px rgba(0,0,0,0.8);
     position: relative;
+    box-sizing: border-box;
 }
 
-/* ОБЕРТКА СЕТКИ — ИСПРАВЛЕНО НА 100%: Стабильный Flex-поток с автопереносом. Костяшки больше никогда не полезут друг на друга! */
-.board-grid-wrapper {
-    display: flex !important;
-    flex-wrap: wrap !important;
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 16px 8px;                                    
-    width: 100%;
-    transform-origin: center center;
-    transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
-}
-
-/* БАЗОВЫЙ ВИД КОСТЯШКИ НА СТОЛЕ (Горизонтальный) */
-.board-zone .domino { 
-    display: inline-flex; 
-    flex-direction: row; 
-    width: 60px;  
-    height: 32px; 
-    background: radial-gradient(circle at 30% 30%, #fdfdfd 0%, #f4f3ef 60%, #e6e3da 100%); 
-    color: #000; 
-    border: 1px solid #111; 
-    border-bottom: 2px solid #000;
-    border-radius: 5px; 
-    cursor: pointer; 
-    box-sizing: border-box; 
-    align-items: center;
-    justify-content: space-between;
-    flex-shrink: 0;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.8);
-}
-
-/* Вертикальный дубль на поле */
-.board-zone .domino.double { 
-    width: 32px; 
-    height: 60px; 
-    flex-direction: column; 
-    background: radial-gradient(circle at 30% 20%, #fdfdfd 0%, #f4f3ef 60%, #e6e3da 100%);
-}
-
-/* РУКА ИГРОКА — ВЫВОД В ДВА РЯДА БЕЗ СКРОЛЛА */
-.tiles-container { 
+/* ИСПРАВЛЕНО: board-lane теперь поддерживает динамическое масштабирование отдаления (zoom) и флекс-повороты */
+.board-lane { 
     display: flex; 
-    flex-wrap: wrap;          
-    gap: 12px 10px;           
+    flex-direction: row; 
     align-items: center; 
-    padding: 10px 0; 
+    justify-content: center; 
+    gap: 6px; 
+    flex-wrap: wrap; /* Разрешаем автоматическое заворачивание костей на новую строку */
+    max-width: 440px; /* Ограничиваем ширину ряда для инициации поворота */
+    transition: transform 0.3s ease; /* Плавное отдаление */
 }
 
-/* ПОДСВЕТКА ПОСЛЕДНЕГО ХОДА */
-@keyframes pulse-glow {
-    0% { box-shadow: 0 0 4px #007bff, inset 0 1px 1px rgba(255,255,255,0.8); }
-    50% { box-shadow: 0 0 14px #007bff, 0 0 20px rgba(0, 123, 255, 0.5), inset 0 1px 1px rgba(255,255,255,0.9); }
-    100% { box-shadow: 0 0 4px #007bff, inset 0 1px 1px rgba(255,255,255,0.8); }
-}
-.board-zone .board-tile-wrapper.last-placed .domino {
-    border: 1.5px solid #007bff !important;
-    animation: pulse-glow 2s infinite ease-in-out;
-}
+.info-panel { background: #22222b; padding: 10px; border-radius: 6px; border: 1px solid #2d2d3a; }
+.info-panel span { font-size: 0.85em; color: #aaa; font-weight: bold; display: block; margin-bottom: 6px; }
+.hand-row { display: flex; flex-wrap: wrap; gap: 8px; min-height: 56px; }
 
-.hand-zone .domino {
-    display: inline-flex;
-    width: 32px;
-    height: 60px;
-    flex-direction: column;
-    background: radial-gradient(circle at 50% 20%, #fdfdfd 0%, #f4f3ef 60%, #e6e3da 100%);
-    color: #000;
-    border: 1px solid #111;
-    border-bottom: 2px solid #000;
-    border-radius: 5px; 
+/* Геометрия классической костяшки домино на чистом CSS */
+.domino { 
+    width: 32px; 
+    height: 56px; 
+    background: #fdfdfd; 
+    border-radius: 4px; 
+    display: flex; 
+    flex-direction: column; 
+    box-shadow: 0 4px 6px rgba(0,0,0,0.4); 
     cursor: pointer;
     box-sizing: border-box;
-    align-items: center;
-    justify-content: space-between;
-    flex-shrink: 0;
-    box-shadow: 0 6px 12px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.8);
+    border: 1px solid #111;
     transition: transform 0.15s ease;
 }
-.hand-zone .domino:hover { transform: translateY(-4px); box-shadow: 0 10px 16px rgba(0,123,255,0.3); }
+.domino:hover { transform: translateY(-4px); }
+.domino.horizontal { width: 56px; height: 32px; flex-direction: row; }
 
-/* Стили модальных окон */
-.modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2000; display: flex; align-items: center; justify-content: center; }
-.modal-box { background: #333; padding: 25px; border-radius: 10px; text-align: center; max-width: 300px; width: 90%; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border: 1px solid #444; }
-.modal-box h3 { margin-top: 0; color: #007bff; font-size: 1.3em; }
-.modal-buttons { display: flex; gap: 10px; margin-top: 20px; justify-content: center; }
-.coin-animation { font-size: 3em; margin: 15px 0; min-height: 1.2em; transition: transform 0.5s ease; }
+.half { flex: 1; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); padding: 3px; box-sizing: border-box; }
+.line { background: #666; opacity: 0.6; }
+.domino:not(.horizontal) .line { height: 1.5px; width: 100%; }
+.domino.horizontal .line { width: 1.5px; height: 100%; }
 
-/* Половинки и разделители */
-.domino .half { width: 28px; height: 28px; position: relative; box-sizing: border-box; }
-.board-zone .domino:not(.double) .line { width: 1.5px; height: 90%; background: rgba(0, 0, 0, 0.65); flex-shrink: 0; }
-.board-zone .domino.double .line, .hand-zone .domino .line { width: 90%; height: 1.5px; background: rgba(0, 0, 0, 0.65); flex-shrink: 0; }
-.dot { position: absolute; width: 4.2px; height: 4.5px; background-color: #111; border-radius: 50%; box-shadow: inset 1px 1px 1px rgba(0,0,0,0.8), 0.5px 0.5px 0.5px rgba(255,255,255,0.7); }
+/* Отрисовка черных точек через CSS Grid */
+.dot { background: #111115; border-radius: 50%; width: 4.5px; height: 4.5px; margin: auto; }
 
-/* ГЕОМЕТРИЯ ТОЧЕК (0-6) */
-.p0 .dot { display: none; } 
-.p1 .dot { left: 12px; top: 12px; }
-.p2 .dot:nth-child(1) { right: 5px; top: 5px; }
-.p2 .dot:nth-child(2) { left: 5px; bottom: 5px; }
-.p3 .dot:nth-child(1) { left: 5px; top: 5px; }
-.p3 .dot:nth-child(2) { left: 12px; top: 12px; }
-.p3 .dot:nth-child(3) { right: 5px; bottom: 5px; }
-.p4 .dot:nth-child(1) { left: 4px; top: 4px; }
-.p4 .dot:nth-child(2) { right: 4px; top: 4px; }
-.p4 .dot:nth-child(3) { left: 4px; bottom: 4px; }
-.p4 .dot:nth-child(4) { right: 4px; bottom: 4px; }
-.p5 .dot:nth-child(1) { left: 4px; top: 4px; }
-.p5 .dot:nth-child(2) { right: 4px; top: 4px; }
-.p5 .dot:nth-child(3) { left: 12px; top: 12px; }
-.p5 .dot:nth-child(4) { left: 4px; bottom: 4px; }
-.p5 .dot:nth-child(5) { right: 4px; bottom: 4px; }
-.p6 .dot:nth-child(1) { left: 4px; top: 4px; }
-.p6 .dot:nth-child(2) { left: 4px; top: 12px; }
-.p6 .dot:nth-child(3) { left: 4px; bottom: 4px; }
-.p6 .dot:nth-child(4) { right: 4px; top: 4px; }
-.p6 .dot:nth-child(5) { right: 4px; top: 12px; }
-.p6 .dot:nth-child(6) { right: 4px; bottom: 4px; }
+/* Шаблоны расположения точек для домино от 1 до 6 */
+.p0 .dot { display: none; }
+.p1 .dot:nth-child(1) { grid-area: 2 / 2; }
+.p2 .dot:nth-child(1) { grid-area: 1 / 1; } .p2 .dot:nth-child(2) { grid-area: 3 / 3; }
+.p3 .dot:nth-child(1) { grid-area: 1 / 1; } .p3 .dot:nth-child(2) { grid-area: 2 / 2; } .p3 .dot:nth-child(3) { grid-area: 3 / 3; }
+.p4 .dot:nth-child(1) { grid-area: 1 / 1; } .p4 .dot:nth-child(2) { grid-area: 1 / 3; } .p4 .dot:nth-child(3) { grid-area: 3 / 1; } .p4 .dot:nth-child(4) { grid-area: 3 / 3; }
+.p5 .dot:nth-child(1) { grid-area: 1 / 1; } .p5 .dot:nth-child(2) { grid-area: 1 / 3; } .p5 .dot:nth-child(3) { grid-area: 2 / 2; } .p5 .dot:nth-child(4) { grid-area: 3 / 1; } .p5 .dot:nth-child(5) { grid-area: 3 / 3; }
+.p6 .dot:nth-child(1) { grid-area: 1 / 1; } .p6 .dot:nth-child(2) { grid-area: 1 / 3; } .p6 .dot:nth-child(3) { grid-area: 2 / 1; } .p6 .dot:nth-child(4) { grid-area: 2 / 3; } .p6 .dot:nth-child(5) { grid-area: 3 / 1; } .p6 .dot:nth-child(6) { grid-area: 3 / 3; }
 
-/* АНИМАЦИИ ПОБЕДЫ И ПОРАЖЕНИЯ */
-@keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
-.status-box.defeat-animation { background: #4a1515 !important; border-left: 4px solid #ff3333 !important; animation: shake 0.5s ease-in-out 2; box-shadow: 0 0 15px rgba(255, 0, 0, 0.4); }
-.status-box.victory-animation { background: #154a1d !important; border-left: 4px solid #28a745 !important; box-shadow: 0 0 20px rgba(40, 167, 69, 0.6); transform: scale(1.02); }
+/* Рубашка скрытых костяшек противника */
+.bot-tile-hidden { width: 22px; height: 38px; background: #2a2a35; border-radius: 3px; border: 1px solid #444; box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
 
-.board-tile-wrapper { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
-.edge-label { position: absolute; top: -20px; font-size: 0.65em; background: #007bff; color: #fff; padding: 2px 6px; border-radius: 3px; font-weight: bold; text-transform: uppercase; white-space: nowrap; z-index: 10; box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+/* Неоновый маркер последнего совершенного хода */
+.last-placed { border: 2px solid #007bff !important; box-shadow: 0 0 10px #007bff, 0 4px 6px rgba(0,0,0,0.4) !important; }
 
-.hand-zone { background: #23232a; padding: 10px; border-radius: 6px; margin-top: 5px; box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
-.hand-title { font-size: 0.85em; color: #aaa; margin-bottom: 5px; font-weight: bold; }
-.bot-tiles { display: flex; gap: 6px; align-items: center; }
-.bot-tile-hidden { width: 25px; height: 48px; background: linear-gradient(135deg, #3a3a42, #1e1e24); border: 1px solid #444; border-radius: 4px; box-shadow: inset 0 0 5px rgba(0,0,0,0.8), 0 2px 4px rgba(0,0,0,0.4); }
-.controls { display: flex; gap: 10px; margin-top: 8px; }
+/* Разметка ЛЕВ / ПРАВ / СТАРТ внутри стола */
+.board-tile-container { position: relative; display: flex; align-items: center; margin: 2px; }
+.edge-label { position: absolute; top: -16px; left: 50%; transform: translateX(-50%); font-size: 9px; font-weight: bold; padding: 2px 4px; background: #007bff; border-radius: 3px; color: #fff; white-space: nowrap; z-index: 10; }
+
+/* Кнопки */
+.controls { display: flex; gap: 10px; }
 button { flex: 1; padding: 14px; background: #007bff; border: none; color: #fff; font-size: 16px; font-weight: bold; border-radius: 6px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
-button:hover { background: #0069d9; }
-button:disabled { background: #444; color: #888; cursor: not-allowed; box-shadow: none; }
 button.bazar-btn { background: #28a745; }
-button.bazar-btn:hover { background: #218838; }
+button.bazar-btn:disabled { background: #444; color: #888; cursor: not-allowed; box-shadow: none; }
+button.pass-btn { background: #dc3545; }
+
+/* Модалка выбора сторон и жребия */
+.modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+.modal-box { background: #2a2a35; padding: 25px; border-radius: 8px; text-align: center; max-width: 300px; width: 90%; border: 1px solid #3a3a4a; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+.modal-box h3 { margin: 0 0 10px 0; color: #007bff; }
+.modal-buttons { display: flex; gap: 10px; margin-top: 15px; }
+.coin-animation { font-size: 3em; margin: 15px 0; min-height: 1.2em; transition: transform 0.5s ease; }
